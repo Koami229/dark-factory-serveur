@@ -1,0 +1,11 @@
+.venv
+venv
+__pycache__
+.pytest_cache
+*.db
+*.db-wal
+*.db-shm
+.git
+.gitignore
+README.md
+test_concurrency.py

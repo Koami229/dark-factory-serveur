@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dark Factory — Réservations</title>
+  <style>
+    :root {
+      --bg: #0b0d12;
+      --bg-elev: #12151c;
+      --bg-card: #171b24;
+      --line: #2a3140;
+      --text: #e8edf7;
+      --muted: #8b95a8;
+      --gold: #e0b35a;
+      --gold-dim: #8a6d2e;
+      --red: #e23d3d;
+      --red-hover: #ff4d4d;
+      --green: #3ecf8e;
+      --danger-bg: #2a1214;
+      --ok-bg: #10261c;
+      --shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+      background:
+        radial-gradient(900px 500px at 10% -10%, rgba(224, 179, 90, 0.12), transparent 50%),
+        radial-gradient(700px 400px at 100% 0%, rgba(226, 61, 61, 0.08), transparent 45%),
+        var(--bg);
+      color: var(--text);
+    }
+
+    .wrap {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 36px 0 64px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .brand {
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    h1 {
+      font-size: clamp(28px, 4vw, 42px);
+      letter-spacing: -0.03em;
+      margin-top: 6px;
+    }
+
+    .badge {
+      border: 1px solid var(--line);
+      background: var(--bg-elev);
+      color: var(--muted);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-family: Consolas, "Cascadia Mono", monospace;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 18px;
+    }
+
+    @media (max-width: 860px) {
+      header { flex-direction: column; align-items: flex-start; }
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: linear-gradient(180deg, var(--bg-card), var(--bg-elev));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    h2 {
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+
+    form {
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    input, select {
+      width: 100%;
+      background: #0d1016;
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 11px 12px;
+      font: inherit;
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--gold-dim);
+      box-shadow: 0 0 0 3px rgba(224, 179, 90, 0.15);
+    }
+
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 600;
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+
+    .btn-gold {
+      background: var(--gold);
+      color: #1a1408;
+    }
+
+    .btn-gold:hover { filter: brightness(1.08); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--line);
+    }
+
+    .btn-red {
+      width: 100%;
+      background: linear-gradient(180deg, var(--red-hover), var(--red));
+      color: white;
+      font-size: 16px;
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(226, 61, 61, 0.28);
+    }
+
+    .btn-red:hover { filter: brightness(1.06); }
+    .btn-red:disabled { opacity: 0.6; cursor: wait; }
+
+    .stress {
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    .live {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 12px;
+      background: #10131a;
+      border: 1px solid var(--line);
+      font-family: Consolas, "Cascadia Mono", monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      min-height: 88px;
+      white-space: pre-wrap;
+    }
+
+    .live.win { border-color: #2f6d4d; background: var(--ok-bg); color: #c8f3dc; }
+    .live.fail { border-color: #7a2c2c; background: var(--danger-bg); }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .stat {
+      background: #0d1016;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .stat b { display: block; font-size: 22px; }
+    .stat span { color: var(--muted); font-size: 11px; }
+
+    .list { display: grid; gap: 10px; max-height: 560px; overflow: auto; }
+
+    .resa {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #10131a;
+    }
+
+    .resa strong { display: block; margin-bottom: 4px; }
+    .resa small { color: var(--muted); }
+
+    .empty { color: var(--muted); text-align: center; padding: 28px 8px; }
+
+    .toast {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--gold);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <div class="brand">Dark Factory · Stage 1</div>
+        <h1>Réservation anti-collision</h1>
+      </div>
+      <div class="badge">UNIQUE(table_id, start_time) · UTC · 30 min</div>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Nouvelle réservation</h2>
+        <form id="booking-form">
+          <div class="row">
+            <label>Table
+              <select id="table_id"></select>
+            </label>
+            <label>Couverts
+              <input id="party_size" type="number" min="1" max="12" value="2" required />
+            </label>
+          </div>
+          <label>Créneau (converti en UTC, blocs de 30 min)
+            <input id="start_time" type="datetime-local" step="1800" required />
+          </label>
+          <label>Nom
+            <input id="customer_name" type="text" maxlength="120" placeholder="Jean Dupont" required />
+          </label>
+          <button class="btn-gold" type="submit">Réserver</button>
+          <div class="toast" id="form-toast"></div>
+        </form>
+
+        <div class="stress">
+          <h2>Preuve pour les juges</h2>
+          <p style="color:var(--muted);font-size:14px;margin-bottom:12px;">
+            20 POST simultanés sur <em>exactement</em> le même créneau et la même table.
+          </p>
+          <button id="stress-btn" class="btn-red" type="button">🔥 Lancer le Test de Concurrence</button>
+          <div class="stats">
+            <div class="stat"><b id="stat-sent">0</b><span>envoyées</span></div>
+            <div class="stat"><b id="stat-ok">0</b><span>succès</span></div>
+            <div class="stat"><b id="stat-ko">0</b><span>rejets</span></div>
+          </div>
+          <div class="live" id="stress-live">En attente du stress test…</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <h2 style="margin:0;">Réservations</h2>
+          <button class="btn-ghost" id="refresh-btn" type="button">Actualiser</button>
+        </div>
+        <div class="list" id="reservation-list">
+          <div class="empty">Chargement…</div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const API = "";
+
+    function pad(n) { return String(n).padStart(2, "0"); }
+
+    function toUtcIso(localValue) {
+      const d = new Date(localValue);
+      return d.toISOString().replace(/\.\d{3}Z$/, "Z");
+    }
+
+    function alignLocalInput(date) {
+      const aligned = new Date(date);
+      aligned.setSeconds(0, 0);
+      const m = aligned.getMinutes();
+      aligned.setMinutes(m < 30 ? 0 : 30);
+      return `${aligned.getFullYear()}-${pad(aligned.getMonth() + 1)}-${pad(aligned.getDate())}T${pad(aligned.getHours())}:${pad(aligned.getMinutes())}`;
+    }
+
+    function formatUtc(iso) {
+      const d = new Date(iso);
+      return d.toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" });
+    }
+
+    function uniqueFutureSlot() {
+      const d = new Date(Date.now() + 60 * 60 * 1000 + Math.floor(Math.random() * 20) * 30 * 60 * 1000);
+      d.setSeconds(0, 0);
+      d.setMinutes(d.getMinutes() < 30 ? 0 : 30);
+      return d.toISOString().replace(/\.\d{3}Z$/, "Z");
+    }
+
+    const tableSelect = document.getElementById("table_id");
+    for (let i = 1; i <= 20; i++) {
+      const opt = document.createElement("option");
+      opt.value = i;
+      opt.textContent = `Table ${i}`;
+      tableSelect.appendChild(opt);
+    }
+    document.getElementById("start_time").value = alignLocalInput(new Date(Date.now() + 3600_000));
+
+    async function loadReservations() {
+      const list = document.getElementById("reservation-list");
+      const res = await fetch(`${API}/reservations`);
+      const data = await res.json();
+      if (!data.length) {
+        list.innerHTML = `<div class="empty">Aucune réservation pour le moment.</div>`;
+        return;
+      }
+      list.innerHTML = data.map((r) => `
+        <article class="resa">
+          <div>
+            <strong>Table ${r.table_id} · ${formatUtc(r.start_time)}</strong>
+            <small>${r.customer_name} · ${r.party_size} couvert${r.party_size > 1 ? "s" : ""} · UTC ${r.start_time}</small>
+          </div>
+          <button class="btn-ghost" data-id="${r.id}" type="button">Annuler</button>
+        </article>
+      `).join("");
+      list.querySelectorAll("button[data-id]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          await fetch(`${API}/reservations/${btn.dataset.id}`, { method: "DELETE" });
+          loadReservations();
+        });
+      });
+    }
+
+    document.getElementById("booking-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const toast = document.getElementById("form-toast");
+      const body = {
+        table_id: Number(document.getElementById("table_id").value),
+        start_time: toUtcIso(document.getElementById("start_time").value),
+        customer_name: document.getElementById("customer_name").value,
+        party_size: Number(document.getElementById("party_size").value),
+      };
+      const res = await fetch(`${API}/reservations`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Idempotency-Key": crypto.randomUUID(),
+        },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 201) {
+        toast.textContent = "Réservation confirmée.";
+      } else if (res.status === 200) {
+        toast.textContent = "Rejeu idempotent : réservation déjà créée.";
+      } else {
+        toast.textContent = data.detail || "Erreur de réservation.";
+      }
+      loadReservations();
+    });
+
+    document.getElementById("refresh-btn").addEventListener("click", loadReservations);
+
+    document.getElementById("stress-btn").addEventListener("click", async () => {
+      const btn = document.getElementById("stress-btn");
+      const live = document.getElementById("stress-live");
+      btn.disabled = true;
+      live.className = "live";
+      live.textContent = "Envoi de 20 requêtes POST simultanées…";
+
+      const slot = uniqueFutureSlot();
+      const tableId = 7;
+      let sent = 0, success = 0, rejected = 0;
+
+      const update = () => {
+        document.getElementById("stat-sent").textContent = String(sent);
+        document.getElementById("stat-ok").textContent = String(success);
+        document.getElementById("stat-ko").textContent = String(rejected);
+        live.textContent =
+          `${sent} requêtes envoyées. ${success} succès, ${rejected} rejets.` +
+          (sent === 20
+            ? (success === 1
+              ? "\nLa double réservation est physiquement impossible !"
+              : "\nRésultat inattendu — vérifier les logs serveur.")
+            : "");
+      };
+
+      const requests = Array.from({ length: 20 }, (_, i) =>
+        fetch(`${API}/reservations`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Idempotency-Key": crypto.randomUUID(),
+          },
+          body: JSON.stringify({
+            table_id: tableId,
+            start_time: slot,
+            customer_name: `Concurrent-${i + 1}`,
+            party_size: 2,
+          }),
+        }).then((res) => {
+          sent += 1;
+          if (res.status === 201) success += 1;
+          else rejected += 1;
+          update();
+          return res.status;
+        }).catch(() => {
+          sent += 1;
+          rejected += 1;
+          update();
+          return 0;
+        })
+      );
+
+      await Promise.all(requests);
+      live.classList.add(success === 1 && rejected === 19 ? "win" : "fail");
+      if (success === 1 && rejected === 19) {
+        live.textContent = "20 requêtes envoyées. 1 succès, 19 rejets. La double réservation est physiquement impossible !";
+      }
+      btn.disabled = false;
+      loadReservations();
+    });
+
+    loadReservations();
+  </script>
+</body>
+</html>
